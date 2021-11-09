@@ -1,0 +1,48 @@
+package client;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
+
+public class ClientHandler extends Thread {
+
+	private DataInputStream inputD;
+	private DataOutputStream outputD;
+	private Socket client;
+
+	public ClientHandler(Socket socket, DataInputStream input, DataOutputStream output) {
+		this.client = socket;
+		inputD = input;
+		outputD = output;
+	}
+
+	@Override
+	public void run() {
+		int received;
+		String toreturn;
+		try {
+			while (true) {
+				outputD.writeUTF("Waiting number from player 1 \nThe number is: ");
+				received = inputD.readInt();
+
+				if (received.equals("Exit")) {
+					System.out.println("Client " + this.client + " sends exit...");
+					System.out.println("Closing this connection.");
+					this.client.close();
+					System.out.println("Connection closed");
+					break;
+				}
+
+				this.inputD.close();
+				this.outputD.close();
+
+			}
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+}

@@ -1,0 +1,70 @@
+package client;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
+import java.util.ArrayList;
+
+public class ClientHandler extends Thread {
+
+	private DataInputStream input;
+	private DataOutputStream output;
+	private Socket client;
+	private int player;
+	private ArrayList<ClientHandler> clients;
+
+	public ClientHandler(Socket client, int player, ArrayList<ClientHandler> clients) throws IOException {
+		this.client = client;
+		this.player = player;
+		this.clients = clients;
+		input = new DataInputStream(client.getInputStream());
+		output = new DataOutputStream(client.getOutputStream());
+	}
+
+	@Override
+	public void run() {
+
+		try {
+			if(player==1) {
+				System.out.println("Player " + player + " connected, waiting the second");
+				output.writeInt(player);	//1 Sending the player number
+				player++;
+				output.writeUTF("Please type a number to start to play:"); //3Sending message
+				int number = input.readInt();	//6 Receiving the number
+				System.out.println("The number is: " + number);
+			}else {
+				System.out.println("Player "+ player + " connected, will start the game");
+				output.writeInt(player);
+				output.writeUTF("Please guess the number of the player 1\nType a number: ");	//3
+			}
+
+			System.out.println("Waiting number from player 1");
+			int guessingNumber = input.readInt();
+			System.out.println("The number is: " + guessingNumber);
+
+//				if(counter==1)
+//				System.out.println("Player 1 connected, waiting the second");
+//
+//				Thread thread = new ClientHandler(client);
+//				System.out.println("ClientHandler instanciated");
+//				
+//				thread.run();
+//				input.readUTF();
+
+		} catch (IOException e) {
+			System.err.println("IO exception in clien handler");
+		} finally {
+			System.out.println("Closing server");
+			try {
+				client.close();
+				input.close();
+				output.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+	}
+
+}

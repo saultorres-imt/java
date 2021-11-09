@@ -1,0 +1,46 @@
+package client;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
+
+public class ClientHandler extends Thread {
+
+	private DataInputStream input;
+	private DataOutputStream output;
+	private Socket client;
+
+	public ClientHandler(Socket socket) throws IOException {
+		client = socket;
+		input = new DataInputStream(socket.getInputStream());
+		output = new DataOutputStream(socket.getOutputStream());
+	}
+
+	@Override
+	public void run() {
+		int numberToGuess;
+		try {
+			while (true) {
+				output.writeUTF("Waiting number from player 1 \nThe number is: ");
+				numberToGuess = input.readInt();
+				
+				System.out.println("The number is: "+ numberToGuess);
+
+//				if (received.equals("Exit")) {
+//					System.out.println("Client " + this.client + " sends exit...");
+//					System.out.println("Closing this connection.");
+//					this.client.close();
+//					System.out.println("Connection closed");
+//					break;
+//				}
+
+			}
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+}

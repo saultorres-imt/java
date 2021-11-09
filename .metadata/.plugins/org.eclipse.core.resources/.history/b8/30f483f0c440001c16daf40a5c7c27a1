@@ -1,0 +1,54 @@
+package client;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
+
+public class ClientHandler extends Thread {
+	
+	final DataInputStream inputD;
+	final DataOutputStream outputD;
+	final Socket client;
+
+	public ClientHandler(Socket socket, DataInputStream input, DataOutputStream output) {
+		this.client = socket;
+		inputD = input;
+		outputD = output;
+	}
+
+	@Override
+	public void run() {
+		String received;
+		String toreturn;
+		while (true) {
+			try {
+
+				// Ask user what he wants
+				outputD.writeUTF("What do you want?[Date | Time]..\n" + "Type Exit to terminate connection.");
+
+				// receive the answer from client
+				received = inputD.readUTF();
+
+				if (received.equals("Exit")) {
+					System.out.println("Client " + this.client + " sends exit...");
+					System.out.println("Closing this connection.");
+					this.client.close();
+					System.out.println("Connection closed");
+					break;
+				}
+
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		try {
+			this.inputD.close();
+			this.outputD.close();
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+}

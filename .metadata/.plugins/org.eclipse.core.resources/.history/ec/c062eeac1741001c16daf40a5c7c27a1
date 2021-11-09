@@ -1,0 +1,122 @@
+package client;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
+import java.util.ArrayList;
+
+public class ClientHandler extends Thread {
+
+	private DataInputStream input;
+	private DataOutputStream output;
+	private Socket client;
+	private int player;
+	private ArrayList<ClientHandler> clients;
+	private int number = -1;
+	private int guess = -1;
+
+	public ClientHandler(Socket client, int player, ArrayList<ClientHandler> clients) throws IOException {
+		this.client = client;
+		this.player = player;
+		this.clients = clients;
+		input = new DataInputStream(client.getInputStream());
+		output = new DataOutputStream(client.getOutputStream());
+	}
+
+	@Override
+	public void run() {
+
+		try {
+			if(player==1) {
+				System.out.println("Player " + player + " connected, waiting the second");
+				output.writeInt(player);	// 1 Sending player #
+				player++;
+				while(clients.size() == 2) {
+					System.out.println("Waiting number from player 1");
+					//System.out.println(clients.get(0).getGuess());
+					output.writeUTF("Please type a number to start to play: "); 	// 2 Sending message
+					setNumber(input.readInt());		// 3 Receiving the number
+					System.out.println("The number is: " + number);
+					break;
+				}
+				// WHILE LOOP
+				while(clients.size() == 2) {
+					if(getGuess() == getNumber()) {
+						output.writeUTF("Player 2 attempted with " + getGuess() + ", player 2 won");
+						break;
+					}else {
+						output.writeUTF("Player 2 attempted with " + getGuess());
+						break;
+					}
+				}
+				
+			}else {
+				System.out.println("Player "+ player + " connected, will start the game");
+				getClients().get(0).setClients(clients); 	// updating clients in player 1
+				output.writeInt(player); 	 // 1 Sending player #
+				output.writeUTF("Please guess the number of the player 1\nType a number: ");// 2 Sending message
+				
+				// WHILE LOOP
+				while(getClients().get(0).getNumber() != -1) {
+					System.out.println("Waiting guess from player 2");
+					setGuess(input.readInt());	// 3 Receiving number
+					getClients().get(0).setGuess(getGuess()); 	// saving the guess in player 1
+					System.out.print("The number from player 2 is: " + guess);
+					if(guess > getClients().get(0).getNumber()){
+						output.writeUTF("Is greater than the number to guess\n Type a number: ");		// 7 Sending message
+						System.out.print(". Is greater than the number");
+					}else if(guess < getClients().get(0).getNumber()) {
+						output.writeUTF("Is lesser than the number to guess\n Type a number: ");
+						System.out.print(". Is lesser than the number");
+					}else {
+						System.out.print(". Player 2 won");
+						break;
+					}
+				}
+
+			}
+
+		} catch (IOException e) {
+			System.err.println("IO exception in clien handler");
+		} finally {
+//			System.out.println("Closing server");
+//			try {
+//				client.close();
+//				input.close();
+//				output.close();
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			}
+		}
+
+	}
+
+	public ArrayList<ClientHandler> getClients() {
+		return clients;
+	}
+
+	public void setClients(ArrayList<ClientHandler> clients) {
+		this.clients = clients;
+	}
+
+	public int getNumber() {
+		return number;
+	}
+
+	public void setNumber(int number) {
+		this.number = number;
+	}
+
+	public int getGuess() {
+		return guess;
+	}
+
+	public void setGuess(int guess) {
+		this.guess = guess;
+	}
+	
+	
+	
+
+}
